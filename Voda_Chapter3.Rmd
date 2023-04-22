@@ -1,0 +1,80 @@
+---
+title: "Chapter3"
+author: "Darian-Florian Voda"
+date: "2023-04-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Data Visualization
+### A practical Introduction
+#### By Kieran Healy
+
+```{r}
+library(gapminder)
+library(tidyverse)
+library(ggplot2)
+gapminder
+```
+
+```{r}
+p = ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp))
+p
+```
+```{r}
+str(p)
+```
+```{r}
+p + geom_point()
+```
+#### Misspelling on page 59 at Chapter 3.4 - "spent more time in that 'chaper'"
+
+```{r}
+p = ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp))
+p + geom_smooth()
+```
+```{r}
+p = ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp))
+p + geom_point() + geom_smooth()
+```
+```{r}
+p = ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp))
+p + geom_point() + geom_smooth(method = "lm")
+```
+```{r}
+p = ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp))
+p + geom_point() + geom_smooth(method = "gam") + scale_x_log10()
+```
+```{r, eval=FALSE}
+p = ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp))
+p + geom_point() + 
+  geom_smooth(method = "gam") + 
+  scale_x_log10(labels = scales::dollar())
+```
+
+### geom_smooth() before geom_point
+```{r}
+p = ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp))
+p + geom_smooth() + geom_point()
+```
+Here there is plotted the same thing as firstly without using any method inside the smooth function, and it is useful for seeing the error area and the line of the points plotted.
+
+### change aes()
+
+```{r}
+p = ggplot(data = gapminder, mapping = aes(x = pop, y = lifeExp))
+p + geom_smooth() + geom_point()
+```
+The area of error for the line seems to look like a violin plot, but also changes quite dramatically w.r.t the other plots. Also, the unit of observation increases on the X axis.
+
+### 
+```{r}
+print("HEy")
+```
+
+
+
+
