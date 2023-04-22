@@ -1,5 +1,5 @@
 ---
-title: "Chapter3"
+title: "Chapter 3"
 author: "Darian-Florian Voda"
 date: "2023-04-21"
 output: html_document
@@ -27,9 +27,11 @@ p
 ```{r}
 str(p)
 ```
+
 ```{r}
 p + geom_point()
 ```
+
 #### Misspelling on page 59 at Chapter 3.4 - "spent more time in that 'chaper'"
 
 ```{r}
@@ -48,11 +50,11 @@ p + geom_point() + geom_smooth(method = "lm")
 p = ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp))
 p + geom_point() + geom_smooth(method = "gam") + scale_x_log10()
 ```
-```{r, eval=FALSE}
+```{r}
 p = ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp))
 p + geom_point() + 
   geom_smooth(method = "gam") + 
-  scale_x_log10(labels = scales::dollar())
+  scale_x_log10(labels = scales::dollar)
 ```
 
 ### geom_smooth() before geom_point
@@ -60,6 +62,7 @@ p + geom_point() +
 p = ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp))
 p + geom_smooth() + geom_point()
 ```
+
 Here there is plotted the same thing as firstly without using any method inside the smooth function, and it is useful for seeing the error area and the line of the points plotted.
 
 ### change aes()
@@ -68,13 +71,81 @@ Here there is plotted the same thing as firstly without using any method inside 
 p = ggplot(data = gapminder, mapping = aes(x = pop, y = lifeExp))
 p + geom_smooth() + geom_point()
 ```
+
 The area of error for the line seems to look like a violin plot, but also changes quite dramatically w.r.t the other plots. Also, the unit of observation increases on the X axis.
 
-### 
+### Alternative scale mappings
 ```{r}
-print("HEy")
+p = ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp))
+p + geom_smooth() + geom_point() + scale_x_sqrt()
 ```
 
+Very interesting, the  distribution of the points are different, even though the smooth line seems to be the same, but there is a different scale of square root.
 
+```{r}
+p = ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp))
+p + geom_smooth() + geom_point() + scale_x_reverse()
+```
 
+Yeah, this is the same as the first distribution but with the y axis mirrored.
 
+```{r}
+p = ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp))
+p + geom_smooth() + geom_point() + scale_y_sqrt()
+```
+```{r}
+p = ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp))
+p + geom_smooth() + geom_point() + scale_y_reverse()
+```
+
+The last one seems to be very different from the others.
+
+### Map color to year instead of continent
+
+```{r}
+p = ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp, 
+                                           color = year, fill = year))
+p + geom_point() + geom_smooth(method = "loess")
+```
+
+I didn't expect ggplot to think that it is better to use a gradient scale for coloring the year. I think maybe it is also because maybe the data interferes and also because of the type of the variable year.
+
+### mapping color = factor(year)
+```{r}
+p = ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp, 
+                                           color = factor(year), fill = factor(year)))
+p + geom_point() + geom_smooth(method = "loess")
+```
+
+Indeed, now the data type is changed and ggplot does not recognize it as a number, but a factor.
+
+### Sketching alternative for figure 3.13
+```{r}
+p = ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp, color = continent, fill = continent))
+p + geom_point(alpha=0.6, mapping = aes(color = continent, fill = continent)) +
+    geom_smooth(method="gam") +
+    scale_x_log10(labels = scales::dollar) +
+    labs(x = "GDP Per Capita", y = "Life Expectancy in Years",
+         title = "Economic Growth and Life Expectancy",
+         subtitle = "Data points are country-years",
+         caption = "Source: Gapminder.")
+```
+In order to beautify figure 3.13 I did the followings:
+
+- Changed the alpha to 0.6 in geom_point in order to be more visible
+- Colored and filled the points with continent's grouping color
+- Colored and filled the smooth line of each continent
+
+I think this is better for readers because they can distinguish the countries and see differences easier.
+
+I tried also to color only the lines and let the error area grey since they intersect, but I think the intersection doesn't matter so much and it looks nicer and more readable with fill = continent.
+
+Thank you very much for your attention and everything.
+Thank you for extending the homework's deadline, since I really had a rough week, I think one of the hardest one since this year.
+I've been last weekend in Italy and came home very suffocated with many homework with due date for 1-2 days and it's been quite hard to catch up with everything. I spent entire nights to finish other homework which were due earlier. But I needed that trip to Italy for my personal and mental health, it was worth it.
+
+Thank you.
+
+With warm and happy regards,
+Darian
+Darian
