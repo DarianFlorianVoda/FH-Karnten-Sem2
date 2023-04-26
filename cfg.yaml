@@ -1,0 +1,18 @@
+CsvReader:
+  sep: ;
+  col_names:
+    - name
+    - id
+    - pcs
+    - factor
+ChangeIndex:
+  col_name: id
+MultiplyCols:
+  col1: pcs
+  col2: factor
+  result_name: weight
+FilterRows:
+  col_name: weight
+  val: 2.0
+WriteDB:
+  file_path: C:\Users\Dari-Laptop\PycharmProjects\FH-Karnten-Sem2\pipeline_dev\src\tdb.json
