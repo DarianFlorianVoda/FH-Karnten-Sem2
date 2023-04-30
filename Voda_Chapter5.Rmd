@@ -1,0 +1,250 @@
+---
+title: "Chapter 5"
+author: "Darian-Florian Voda"
+date: "2023-04-29"
+output: 
+  html_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Data Visualization
+### A practical Introduction
+#### By Kieran Healy
+
+```{r}
+library(gapminder)
+library(tidyverse)
+library(ggplot2)
+library(socviz)
+library(ggrepel)
+library(scales)
+```
+
+```{r}
+rel_by_region = gss_sm %>%
+  group_by(bigregion, religion) %>%
+  summarize(N = n()) %>%
+  mutate(freq = N / sum(N),
+         pct = round((freq*100), 0) )
+rel_by_region
+```
+
+```{r}
+rel_by_region_2 = gss_sm %>%
+  group_by(bigregion, religion) %>%
+  summarize(N = n())
+rel_by_region_2
+```
+
+```{r}
+rel_by_region %>% group_by(bigregion) %>% summarize(total = sum(pct))
+```
+
+```{r}
+p = ggplot(rel_by_region, aes(x = bigregion, y = pct, fill = religion))
+p + geom_col(position = "dodge2") + 
+    labs(x = "Region", y = "Percent", fill = "Religion") + 
+    theme(legend.position = "top")
+```
+
+```{r}
+p = ggplot(rel_by_region, aes(x = bigregion, y = pct, fill = religion))
+p + geom_col(position = "dodge") + 
+    labs(x = "Region", y = "Percent", fill = "Religion") + 
+    theme(legend.position = "top")
+```
+
+```{r}
+p = ggplot(rel_by_region, aes(x = religion, y = pct, fill = religion))
+p + geom_col(position = "dodge2") + 
+    labs(x = NULL, y = "Percent", fill = "Religion") +
+    guides(fill=FALSE) + 
+    coord_flip() + 
+    facet_grid(~ bigregion)
+```
+
+```{r}
+organdata %>% select(1:6) %>% sample_n(size = 10)
+```
+
+```{r}
+p = ggplot(data = organdata, mapping = aes(x = year, y = donors))
+p + geom_point()
+```
+
+```{r}
+p = ggplot(data = organdata, mapping = aes(x = year, y = donors))
+p + geom_line(aes(group = country)) + facet_wrap(~country)
+```
+
+```{r}
+p = ggplot(data = organdata, mapping = aes(x = country, y = donors))
+p + geom_boxplot() + coord_flip()
+```
+
+```{r}
+p = ggplot(data = organdata, mapping = aes(x = reorder(country, donors, na.rm=TRUE), y = donors))
+p + geom_boxplot() + labs(x = NULL) + coord_flip()
+```
+
+```{r}
+p = ggplot(data = organdata, mapping = aes(x = reorder(country, donors, na.rm=TRUE), y = donors, fill = world))
+p + geom_boxplot() + labs(x = NULL) + coord_flip() + theme(legend.position = "top")
+```
+
+```{r}
+by_country = organdata %>% group_by(consent_law, country) %>%
+  summarize(donors_mean = mean(donors, na.rm = TRUE),
+            donors_sd = sd(donors, na.rm = TRUE),
+            gdp_mean = mean(gdp, na.rm = TRUE),
+            health_mean = mean(health, na.rm = TRUE),
+            roads_mean = mean(roads, na.rm = TRUE),
+            cerebvas_mean = mean(cerebvas, na.rm = TRUE))
+
+by_country
+```
+
+```{r}
+by_year = organdata %>% group_by(consent_law, year) %>%
+  summarize(donors_mean = mean(donors, na.rm = TRUE),
+            donors_sd = sd(donors, na.rm = TRUE),
+            gdp_mean = mean(gdp, na.rm = TRUE),
+            health_mean = mean(health, na.rm = TRUE),
+            roads_mean = mean(roads, na.rm = TRUE),
+            cerebvas_mean = mean(cerebvas, na.rm = TRUE))
+
+by_year
+```
+
+```{r}
+by_country = organdata %>% group_by(consent_law, country) %>%
+  summarize_if(is.numeric, funs(mean, sd),  na.rm = TRUE) %>%
+  ungroup()
+
+by_country
+```
+
+```{r}
+p = ggplot(data = by_country,
+           mapping = aes(x = donors_mean, y = reorder(country, donors_mean),
+                         color = consent_law))
+
+p + geom_point(size = 3) + 
+    labs(x = "Donor Procurement Rate",
+         y = "", color = "Consent Law") +
+    theme(legend.position = "top")
+```
+
+```{r}
+p = ggplot(data = by_country,
+           mapping = aes(x = donors_mean, y = reorder(country, donors_mean)))
+
+p + geom_point(size = 3) +
+    facet_wrap(~ consent_law, scales = "free_y", ncol = 1) +
+    labs(x = "Donor Procurement Rate",
+         y = "")
+
+```
+
+## Question: What about using na.rm = TRUE instead of free_y?
+What does Cleveland plot exactly means?
+
+```{r}
+p = ggplot(data = by_country,
+           mapping = aes(x = reorder(country, donors_mean), y = donors_mean))
+
+p + geom_pointrange(mapping = aes(ymin = donors_mean - donors_sd, ymax = donors_mean + donors_sd)) +
+    labs(x = "",
+         y = "Donor Procurement Rate") +
+    coord_flip()
+
+```
+
+```{r}
+p = ggplot(data = by_country,
+           mapping = aes(x = roads_mean, y = donors_mean))
+
+p + geom_point() + geom_text(mapping = aes(label = country), hjust = 1)
+```
+
+```{r}
+elections_historic %>% select(2:7)
+```
+
+```{r}
+p_title = "Presidential Elections: Popular & Electoral College Margins"
+p_subtitle = "1824-2016"
+p_caption = "DAta for 2016 are provisional."
+x_label = "Winner's share of Popular Vote"
+y_label = "Winner's share of Electoral College Vote"
+
+p = ggplot(elections_historic, aes(x = popular_pct, y = ec_pct, label = winner_label))
+p + geom_hline(yintercept = 0.5, size = 1.4, color = "gray80") +
+    geom_vline(xintercept = 0.5, size = 1.4, color = "gray80") +
+    geom_point() +
+    geom_text_repel() +
+    scale_x_continuous(labels = scales::percent) +
+    scale_y_continuous(labels = scales::percent) +
+    labs(x = x_label, y = y_label, title = p_title, subtitle = p_subtitle, caption = p_caption)
+```
+
+It doesn't workkkk idk why
+
+```{r}
+organdata$ind = organdata$ccode %in% c("Ita", "Spa") & organdata$year > 1998
+
+p = ggplot(data = organdata,
+           mapping = aes(x = roads, y = donors, color = ind))
+
+p + geom_point() + geom_text_repel(data = subset(organdata, ind), mapping = aes(label = ccode)) +
+    guides(label = FALSE, color = FALSE)
+```
+
+## Chapter 5.7
+
+### 1. Subset()
+
+```{r}
+elections_historic
+```
+
+
+```{r}
+p_title = "Presidential Elections: Popular & Electoral College Margins"
+p_subtitle = "1992-2016"
+p_caption = "Data for 2016 are provisional."
+x_label = "Winner's share of Popular Vote"
+y_label = "Winner's share of Electoral College Vote"
+
+p = ggplot(subset(elections_historic, year > 1992), aes(x = popular_pct, y = ec_pct, label = winner_label, color = win_party))
+p + geom_hline(yintercept = 0.5, size = 1.4, color = "gray80") +
+    geom_vline(xintercept = 0.5, size = 1.4, color = "gray80") +
+    geom_point() +
+    geom_text_repel() +
+    scale_x_continuous(labels = scales::percent) +
+    scale_y_continuous(labels = scales::percent) +
+    labs(x = x_label, y = y_label, title = p_title, subtitle = p_subtitle, caption = p_caption)
+```
+
+### 2. geom_point()
+
+```{r}
+p = ggplot(data = elections_historic,
+           mapping = aes(x = ec_pct, y = reorder(winner, popular_pct), label = winner_label,
+                         color = win_party))
+
+p + geom_point(size = 3) +
+    labs(x = "Election points",
+         y = "", color = "Winner party") +
+    theme(legend.position = "top")
+```
+
+### 3. annotate()
+
+```{r}
+
+```
