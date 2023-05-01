@@ -22,6 +22,7 @@ library(ggplot2)
 library(socviz)
 library(ggrepel)
 library(scales)
+library(dplyr)
 ```
 
 ```{r}
@@ -246,5 +247,143 @@ p + geom_point(size = 3) +
 ### 3. annotate()
 
 ```{r}
+p_title = "Presidential Elections: Popular & Electoral College Margins"
+p_subtitle = "1992-2016"
+p_caption = "Data for 2016 are provisional."
+x_label = "Winner's share of Popular Vote"
+y_label = "Winner's share of Electoral College Vote"
 
+p = ggplot(elections_historic, aes(x = popular_pct, y = ec_pct, label = winner_label))
+p + geom_hline(yintercept = 0.5, size = 1.4, color = "gray80") +
+    geom_vline(xintercept = 0.5, size = 1.4, color = "gray80") +
+    geom_point() +
+    annotate(geom = "rect", xmin = 0.3, xmax = 0.5, ymin = 0.5, ymax = 1.0, fill = "red", alpha = 0.2) +
+    geom_text_repel() +
+    scale_x_continuous(labels = scales::percent) +
+    scale_y_continuous(labels = scales::percent) +
+    labs(x = x_label, y = y_label, title = p_title, subtitle = p_subtitle, caption = p_caption)
 ```
+
+### 4. Reproduce pair of graphs using dplyr
+
+```{r}
+gapminder
+```
+
+```{r}
+data = gapminder %>%
+  filter(year == 2007) %>%
+  group_by(continent) %>%
+  summarize(avg = mean(lifeExp))
+
+data
+```
+
+```{r}
+p = ggplot(data, aes(x = avg, y = continent))
+p + geom_col() +
+    labs(x = "Life expectancy in years, 2007", y = "")
+```
+
+```{r}
+p + geom_point(size = 5)+
+    labs(x = "Life expectancy in years, 2007", y = "")
+```
+
+### 5. Comfortable with dplyr pipelines
+
+```{r}
+gss_sm %>% group_by(race, degree) %>% summarize(N = n()) %>%
+  mutate(pct = round(N/sum(N) * 100, 0))
+```
+
+### 6. Group by sex or region
+
+```{r}
+gss_sm %>% group_by(sex, region) %>% summarize(N = n()) %>%
+  mutate(pct = round(N/sum(N) * 100, 0))
+```
+
+```{r}
+gss_sm %>% group_by(sex) %>% summarize(N = n()) %>%
+  mutate(pct = round(N/sum(N) * 100, 0))
+```
+
+```{r}
+gss_sm %>% group_by(region) %>% summarize(N = n()) %>%
+  mutate(pct = round(N/sum(N) * 100, 0))
+```
+
+### 7. Calculate the mean and median of children by degree
+
+```{r}
+gss_sm
+```
+
+```{r}
+gss_sm %>% group_by(degree) %>% 
+  summarize(avg = mean(childs, na.rm = TRUE),
+            median = median(childs, na.rm = TRUE))
+```
+
+### 8. gapminder new geoms
+
+```{r}
+gapminder
+```
+
+```{r}
+p = ggplot(gapminder, aes(x = continent, y = lifeExp))
+p + geom_boxplot() +
+    facet_wrap(~ continent)
+```
+
+```{r}
+data2 = gapminder %>% group_by(year, continent) %>%
+  summarize(avg = mean(lifeExp))
+data2
+```
+
+```{r}
+p = ggplot(data2, aes(x = continent, y = avg))
+p + geom_boxplot()
+```
+
+### 9. Read help page
+
+```{r}
+help("geom_boxplot")
+print("notch - If FALSE (default) make a standard box plot. If TRUE, make a notched box plot. Notches are used to compare groups; if the notches of two boxes do not overlap, this suggests that the medians are significantly different.
+varwidth - If FALSE (default) make a standard box plot. If TRUE, boxes are drawn with widths proportional to the square-roots of the number of observations in the groups (possibly weighted, using the weight aesthetic).")
+```
+
+### 10. Try geom_violin()
+
+```{r}
+p = ggplot(data2, aes(x = continent, y = avg))
+p + geom_violin()
+```
+
+### 11. geom_pointrange()
+
+```{r}
+p = ggplot(gapminder, aes(x = lifeExp, y = pop))
+p + geom_pointrange(mapping = aes(ymin = mean(lifeExp) - sd(lifeExp), ymax = mean(lifeExp) + sd(lifeExp)))+
+  facet_wrap(~continent)
+```
+
+```{r}
+p = ggplot(gapminder, aes(x = continent, y = mean(lifeExp)))
+p + geom_point() + geom_linerange(aes(ymin = min(lifeExp), ymax = max(lifeExp)))
+```
+
+```{r}
+p = ggplot(gapminder, aes(x = continent, y = mean(lifeExp)))
+p + geom_point() + geom_crossbar(aes(ymin = min(lifeExp), ymax = max(lifeExp)))
+```
+
+```{r}
+p = ggplot(gapminder, aes(x = continent, y = mean(lifeExp)))
+p + geom_point() + geom_errorbar(aes(ymin = mean(lifeExp) - sd(lifeExp), ymax = mean(lifeExp) + sd(lifeExp)))
+```
+
