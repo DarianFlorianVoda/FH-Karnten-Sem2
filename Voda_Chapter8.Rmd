@@ -107,5 +107,47 @@ p3
 ## Question: What does gather() do??
 
 ```{r}
-
+cowplot::plot_grid(p1, p2, nrow=2, rel_heights = c(0.75, 0.25), align = "v")
 ```
+
+```{r}
+library(viridis)
+
+f_labs = c(`Borrowers` = "Percent of\nall Borrowers",
+           `Balances` = "Percent of\nall Balances")
+
+p_xlab = "Amount Owed, in thousands of Dollars"
+p_title = "Outstanding Student Loans"
+p_subtitle = "44 million borrowers owe a total of $1.3 trillion"
+p_caption = "Source: FRB NY"
+
+
+p = ggplot(studebt, aes(y = pct/100, x = type, fill = Debtrc))
+p + geom_bar(stat = "identity", color = "gray80") +
+  scale_x_discrete(labels = as_labeller(f_labs)) + 
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_viridis(discrete = TRUE) +
+  guides(fill = guide_legend(reverse = TRUE,
+                             title.position = "top",
+                             label.position = "bottom",
+                             keywidth = 3,
+                             nrow = 1)) +
+  labs(x = NULL, y = NULL,
+       fill = "Amount Owed, in thousands of dollars",
+       caption = p_caption,
+       title = p_title,
+       subtitle = p_subtitle) +
+  theme(legend.position = "top",
+        axis.text.y = element_text(face = "bold", hjust = 1, size = 12),
+        axis.ticks.length = unit(0, "cm"),
+        panel.grid.major.y = element_blank()) +
+  coord_flip()
+```
+
+## Chapter 8.6 Where to Go Next
+
+- [GGplot2 Extensions](ggplot2-exts.org)
+- [R Graph Gallery](r-graph-gallery.com)
+- [R for Data Science](r4ds.had.co.nz)
+- [R Programming for Data Science](https://leanpub.com/rprogramming)
+- [Policy Viz](policyviz.com)
