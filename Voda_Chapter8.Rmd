@@ -60,6 +60,7 @@ p4
 ```
 
 ## Question: What is Likert scale?
+### A scale like from 0 to 5 or from 'not likely' to 'surely'.
 
 ```{r}
 p = ggplot(data = organdata, mapping = aes(x = roads, y = donors, color = world))
@@ -105,6 +106,7 @@ p3
 ```
 
 ## Question: What does gather() do??
+### Create an object that filters based on a specific key the values.
 
 ```{r}
 cowplot::plot_grid(p1, p2, nrow=2, rel_heights = c(0.75, 0.25), align = "v")
