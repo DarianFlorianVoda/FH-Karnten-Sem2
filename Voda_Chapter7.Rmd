@@ -163,7 +163,7 @@ p1 + labs(title = "Trump vote") + theme_map() + labs(fill = "Percent")
 
 
 ## Question: Here i got an error, why?
-```{r}
+```{r eval=FALSE}
 p0 = ggplot(data = us_states_elec,
            aes(x = long, y = lat, group = group, fill = d_points))
 
@@ -220,3 +220,41 @@ p1 = p + geom_polygon(color = "gray90", size = 0.05) + coord_equal()
 p2 = p1 + scale_fill_brewer(palette = "Greens")
 p2
 ```
+
+```{r}
+orange_pal = RColorBrewer::brewer.pal(n = 6, name = "Oranges")
+orange_rev = rev(orange_pal)
+orange_rev
+```
+
+```{r}
+gun_p = ggplot(data = county_full,
+               mapping = aes(x = long, y = lat,
+                             fill = su_gun6,
+                             group = group))
+
+gun_p1 = gun_p + geom_polygon(color = "gray90", size = 0.05) + coord_equal()
+
+gun_p2 = gun_p1 + scale_fill_manual(values = orange_pal)
+
+gun_p2 + labs(title = "Gun-Related Suicides, 1999-2015", fill = "Rate per 100,000 pop.") +
+  theme_map() + theme(legend.position = "bottom")
+```
+
+## There is no more statebins_continuous
+
+```{r}
+library(statebins)
+
+statebins(state_data = election, state_col = "state",
+                    value_col = "pct_trump",
+                    font_size = 3,
+                     )
+```
+
+## More Info
+
+[sf](https://r-spatial.github.io/sf/)
+[tigris](https://github.com/walkerke/tigris)
+[tidycensus](https://walker-data.com/tidycensus/)
+
