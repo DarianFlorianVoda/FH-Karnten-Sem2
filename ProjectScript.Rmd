@@ -1,0 +1,104 @@
+---
+title: "Young People Survey"
+author: "Darian-Florian Voda"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: yes
+    df_print: paged
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## R Data Visualization Project: Young People Survey
+
+## Information about the main dataset (responses)
+
+- In 2013, students of the Statistics class at FSEV UK were asked to invite their friends to participate in this survey.
+- The data file (responses.csv) consists of 1010 rows and 150 columns (139 integer and 11 categorical).
+- For convenience, the original variable names were shortened in the data file.
+- File columns.csv represents the dataset for the shortenings made for each variable name
+- All participants were of Slovakian nationality (the questionnaire was later translated in English), aged between 15-30.
+
+The variables can be split into the following groups:
+- Music preferences (19 items)
+- Movie preferences (12 items)
+- Hobbies & interests (32 items)
+- Phobias (10 items)
+- Health habits (3 items)
+- Personality traits, views on life, & opinions (57 items)
+- Spending habits (7 items)
+- Demographics (10 items)
+
+## Main Question: How to effectively visualize a lot of variables in order to gain some meaningful insights from the data?
+
+### Example of a specific category
+
+#### MUSIC PREFERENCES
+
+1. I enjoy listening to music.: Strongly disagree 1-2-3-4-5 Strongly agree (integer)
+2. I prefer.: Slow paced music 1-2-3-4-5 Fast paced music (integer)
+3. Dance, Disco, Funk: Don't enjoy at all 1-2-3-4-5 Enjoy very much (integer)
+4. Folk music: Don't enjoy at all 1-2-3-4-5 Enjoy very much (integer)
+5. Country: Don't enjoy at all 1-2-3-4-5 Enjoy very much (integer)
+6. Classical: Don't enjoy at all 1-2-3-4-5 Enjoy very much (integer)
+7. Musicals: Don't enjoy at all 1-2-3-4-5 Enjoy very much (integer)
+8. Pop: Don't enjoy at all 1-2-3-4-5 Enjoy very much (integer)
+9. Rock: Don't enjoy at all 1-2-3-4-5 Enjoy very much (integer)
+10. Metal, Hard rock: Don't enjoy at all 1-2-3-4-5 Enjoy very much (integer)
+
+
+
+### Import data
+```{r}
+data = read.csv("responses.csv")
+columns = read.csv("columns.csv")
+
+head(data)
+```
+### See columns data
+
+```{r}
+head(columns)
+```
+## Exploratory Data Analysis (EDA)
+
+Firstly, we will split each category in dataframes for a better management
+
+```{r}
+# Split into DFs
+music_dataframe = data.frame(data[1:19])
+
+movies_dataframe = data.frame(data[20:31])
+
+hobbies_dataframe = data.frame(data[32:63])
+
+phobias_dataframe = data.frame(data[64:73])
+
+health_habits_dataframe = data.frame(data[74:76])
+
+personality_dataframe = data.frame(data[78:133])
+
+spendings_dataframe = data.frame(data[134:140])
+
+demographics_dataframe = data.frame(data[141:150])
+```
+
+Now, we will take an overall look at each category
+
+```{r}
+
+```
+
+## Idea:
+
+- Create an an interactive graph that is based on the specific things (Music, Movies, etc)
+- Then on the lower side of this mini-infograph you can expand the other things for the other categories
+- Create Pie charts for Genres of music/movie/etc
+
+
+
