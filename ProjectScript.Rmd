@@ -1,11 +1,14 @@
 ---
-title: "Young People Survey"
+title: "R Data Visualization Project: Young People Survey"
 author: "Darian-Florian Voda"
-date: "`r Sys.Date()`"
+date: "22.06.2023"
 output:
   html_document:
     toc: yes
     df_print: paged
+    toc_float: true
+    toc_collapsed: true
+    number_sections: true
   pdf_document:
     toc: yes
 ---
@@ -17,13 +20,13 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```{r}
 library(ggplot2)
 library(dplyr)
-library(ggrepel)
 library(tidyverse)
+library(plotly)
 ```
 
-## R Data Visualization Project: Young People Survey
+# Details about the Project
 
-## Information about the main dataset (responses)
+## Information about the dataset
 
 - In 2013, students of the Statistics class at FSEV UK were asked to invite their friends to participate in this survey.
 - The data file (responses.csv) consists of 1010 rows and 150 columns (139 integer and 11 categorical).
@@ -31,7 +34,8 @@ library(tidyverse)
 - File columns.csv represents the dataset for the shortenings made for each variable name
 - All participants were of Slovakian nationality (the questionnaire was later translated in English), aged between 15-30.
 
-The variables can be split into the following groups:
+The variables can be split into the following fields:
+
 - Music preferences (19 items)
 - Movie preferences (12 items)
 - Hobbies & interests (32 items)
@@ -41,11 +45,12 @@ The variables can be split into the following groups:
 - Spending habits (7 items)
 - Demographics (10 items)
 
-## Main Question: How to effectively visualize a lot of variables in order to gain some meaningful insights from the data?
+## Main Question
+**How to effectively visualize a lot of variables in order to gain some meaningful insights from the data?**
 
-### Example of a specific category
+## Example from a specific field
 
-#### MUSIC PREFERENCES
+MUSIC PREFERENCES
 
 1. I enjoy listening to music.: Strongly disagree 1-2-3-4-5 Strongly agree (integer)
 2. I prefer.: Slow paced music 1-2-3-4-5 Fast paced music (integer)
@@ -58,23 +63,35 @@ The variables can be split into the following groups:
 9. Rock: Don't enjoy at all 1-2-3-4-5 Enjoy very much (integer)
 10. Metal, Hard rock: Don't enjoy at all 1-2-3-4-5 Enjoy very much (integer)
 
+Since there are so many fields and many variables, I took a specific field to analyze and see how can I represent all the variables into only one visualization in order to gain some insights from that specific field.
 
+The chosen field is: **MUSIC**
 
-### Import data
+# Coding process
+
+## Import data
 ```{r}
 data = read.csv("responses.csv")
 columns = read.csv("columns.csv")
 
 head(data)
 ```
-### See columns data
 
+See the columns data
 ```{r}
 head(columns)
 ```
-## Exploratory Data Analysis (EDA)
 
-Firstly, we will split each category in dataframes for a better management
+
+## EDA & Preprocessing
+
+Firstly, we will take a look at the type of our data
+```{r}
+str(data)
+```
+
+
+Secondly, we will split each category in dataframes for a better management
 
 ```{r}
 # Split into DFs
@@ -114,21 +131,162 @@ overall_music_plot = ggplot(overall_music, aes(x = Music, y = counts, fill=count
         plot.title = element_text(hjust = 0.5))+
   labs(y="Number of respondents")+
   ggtitle("How much people enjoy Music?")+
-  geom_text(x=1, y=770, label="1 - not so much", color="red", hjust = 0, size = 5)+
-  geom_text(x=1, y=740, label="5 - very much", color = "blue", hjust = 0, size = 5)+
+  geom_text(x=1, y=770, label="1 - Strongly disagree", color="red", hjust = 0, size = 5)+
+  geom_text(x=1, y=730, label="5 - Strongly agree", color = "blue", hjust = 0, size = 5)+
   scale_y_continuous(breaks=round(seq(0, max(overall_music$counts), by=100), 1))
 
 overall_music_plot
 ```
 
+## Convert data in another format
+
+Now comes the hard part
+
+We want to convert the music_dataframe into the following table example:
+
+| Question | Strongly_disagree | Disagree | Neutral | Agree | Strongly agree |
+|:--------:|:-----------------:|:--------:|:-------:|:-----:|:--------------:|
+|   Music  |         19        |    20    |    31   |   42  |       50       |
+|   Dance  |         11        |    22    |    33   |   44  |       55       |
 
 
+This table represents the following:
+
+- The columns are: the question and the response (1-5) converted into Strongly disagree-Strongly agree
+- Each row represents a question and the count of each response
 
 
-## Idea:
+For this, we will take the columns and retain it into a variable
+```{r}
+## Convert columns to Rows
+Question = colnames(music_dataframe)
+Question
+```
 
-- Create an an interactive graph that is based on the specific things (Music, Movies, etc)
-- Then on the lower side of this mini-infograph you can expand the other things for the other categories
-- Create Pie charts for Genres of music/movie/etc
+Then we create a dataframe with the column "Question" and add as values each Category from the Field of Music
+After that, we will add as columns the available responses with NA values (since this needs to be preprocessed first)
+```{r}
+df = data.frame(Question)
+
+df = df %>%
+  add_column("Strongly_disagree" = NA,
+             "Disagree" = NA,
+             "Neutral" = NA,
+             "Agree" = NA,
+             "Strongly_agree" = NA)
+
+df
+```
 
 
+Now we will count and group each occurrence for each response (1-5) and store it in occurrences table
+This table will be unzipped then because we are interested only in the values, not in the columns
+```{r}
+# Count occurrences of each value in each column
+occurrences <- lapply(music_dataframe, table)
+values <- lapply(occurrences, function(x) as.vector(unname(x)))
+print(occurrences)
+values
+```
+
+Then we manually add these values for each ROW starting from the second column until the end
+P.S.: I added manually because the 'for' loop didn't want to help me
+```{r}
+### INSERT VALUES FOR THE COLUMNS OF EACH QUESTION
+df[1, 2:(1 + length(values$Music))] <- c(values$Music, df[2, -(1:(1 + length(values$Music)))])
+df[2, 2:(1 + length(values$Slow.songs.or.fast.songs))] <- c(values$Slow.songs.or.fast.songs, df[2, -(1:(1 + length(values$Slow.songs.or.fast.songs)))])
+df[3, 2:(1 + length(values$Dance))] <- c(values$Dance, df[2, -(1:(1 + length(values$Dance)))])
+df[4, 2:(1 + length(values$Folk))] <- c(values$Folk, df[2, -(1:(1 + length(values$Folk)))])
+df[5, 2:(1 + length(values$Country))] <- c(values$Country, df[2, -(1:(1 + length(values$Country)))])
+df[6, 2:(1 + length(values$Classical.music))] <- c(values$Classical.music, df[2, -(1:(1 + length(values$Classical.music)))])
+df[7, 2:(1 + length(values$Musical))] <- c(values$Musical, df[2, -(1:(1 + length(values$Musical)))])
+df[8, 2:(1 + length(values$Pop))] <- c(values$Pop, df[2, -(1:(1 + length(values$Pop)))])
+df[9, 2:(1 + length(values$Rock))] <- c(values$Rock, df[2, -(1:(1 + length(values$Rock)))])
+df[10, 2:(1 + length(values$Metal.or.Hardrock))] <- c(values$Metal.or.Hardrock, df[2, -(1:(1 + length(values$Metal.or.Hardrock)))])
+df[11, 2:(1 + length(values$Punk))] <- c(values$Punk, df[2, -(1:(1 + length(values$Punk)))])
+df[12, 2:(1 + length(values$Hiphop..Rap))] <- c(values$Hiphop..Rap, df[2, -(1:(1 + length(values$Hiphop..Rap)))])
+df[13, 2:(1 + length(values$Reggae..Ska))] <- c(values$Reggae..Ska, df[2, -(1:(1 + length(values$Reggae..Ska)))])
+df[14, 2:(1 + length(values$Swing..Jazz))] <- c(values$Swing..Jazz, df[2, -(1:(1 + length(values$Swing..Jazz)))])
+df[15, 2:(1 + length(values$Rock.n.roll))] <- c(values$Rock.n.roll, df[2, -(1:(1 + length(values$Rock.n.roll)))])
+df[16, 2:(1 + length(values$Alternative))] <- c(values$Alternative, df[2, -(1:(1 + length(values$Alternative)))])
+df[17, 2:(1 + length(values$Latino))] <- c(values$Latino, df[2, -(1:(1 + length(values$Latino)))])
+df[18, 2:(1 + length(values$Techno..Trance))] <- c(values$Techno..Trance, df[2, -(1:(1 + length(values$Techno..Trance)))])
+df[19, 2:(1 + length(values$Opera))] <- c(values$Opera, df[2, -(1:(1 + length(values$Opera)))])
+
+df
+```
+
+## Plot creation
+
+For the plot creation we will choose a stacked bar chart, since we have discrete values (number of occurrences) combined with categorical values (Strongly disagree-Strongly agree) and nominal values (Music, Dance, Folk, Opera, etc.)
+
+For this we will transform the dataframe into a **long** format using tidyr
+
+```{r}
+df_long <- tidyr::gather(df, Answer, Occurrences, -Question)
+df_long
+```
+
+Now we want also to calculate the percentages of each response from each Category
+
+```{r}
+# Calculate percentages
+df_long <- transform(df_long, Percentage = Occurrences / tapply(Occurrences, Question, sum)[Question] * 100)
+
+# Reorder the levels for Answer column
+df_long$Answer <- factor(df_long$Answer, levels = c("Strongly_agree", "Agree", "Neutral", "Disagree", "Strongly_disagree"))
+
+df_long
+```
+
+And now we will create the wanted stacked bar chart
+```{r, out.width="1000px"}
+# Horizontal Stacked Bar Chart
+stacked_music_field <- ggplot(df_long, aes(x = Percentage, y = Question, fill = Answer, text = paste("Answer: ", Answer, "<br>Occurrences: ", Occurrences, "<br>Percentage: ", Percentage, "%"))) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = ifelse(Percentage < 3, "", paste0(round(Percentage, 1), "%"))),
+            position = position_stack(vjust = 0.5), color = "blue", size = 3.5) +
+  geom_text(aes(label = Occurrences), size = 0, alpha = 0) +  # Add hidden Occurrences
+  labs(x = "Percentage", y = "Category") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  ggtitle("How much people enjoy the following Categories?")+
+  scale_fill_manual(name = "Scale", values = c("seagreen4", "green", "grey", "chocolate1", "tomato2"), labels = c("Strongly disagree", "Disagree", "Neutral", "Agree", "Strongly agree"))
+
+# Convert ggplot to a plotly plot
+stacked_music_field <- ggplotly(stacked_music_field, tooltip = "text")
+
+# Modify the tooltip text
+stacked_music_field$x$data[[1]]$text <- df_long$Answer
+
+# Print the plot
+stacked_music_field
+```
+
+Note: As we seen from first section, the Question: "Do you prefer Slow songs or Fast songs?" is valued as the following:
+
+- 1 - Slow songs
+- 5 - Fast songs
+
+# Conclusions
+
+This project helped me to draw some important conclusion during the coding process:
+
+- The transition from wide to long format is quite hard
+- From 0 ideas of how to represent so many variables, I came to over 5 ideas and most of them were way too complex
+- Stacked bar chart represents a simple & very efficient way to visualize multiple variables with many levels of responses
+- People really dislike Metal/Hardrock type, but they Agree to Rock type... weird
+- There are other many ideas different from this graph such that the data was represented in a possible better way, but the time will increase exponetially
+- There is still place for improvement even for this graph (Personally I know at least 2 things that I can improve)
+- My expected time spent on this project was 5-7 hours, but it ended with 20+ hours...
+
+# Bibliography
+[Kaggle Source](https://www.kaggle.com/datasets/miroslavsabo/young-people-survey?resource=download)
+
+[The legendary forum](https://stackoverflow.com/)
+
+[Kirk CHRTS Taxonomy from Moodle](https://moodle.fh-kaernten.at/pluginfile.php/440898/mod_resource/content/2/Kirk_2019_CHRTS_chart_taxonomy.pdf)
+
+[Towards Data Science Report](https://towardsdatascience.com/5-ways-to-effectively-visualize-survey-data-using-r-89928bf08cb2)
+
+[R Graph Gallery](https://r-graph-gallery.com/48-grouped-barplot-with-ggplot2)

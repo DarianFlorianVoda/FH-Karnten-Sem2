@@ -36,6 +36,7 @@ library(ggplot2)
 library(dplyr)
 library(ggrepel)
 library(tidyverse)
+library(scales)
 
 clrs5 <- c("firebrick4", "firebrick1", "gray70", "blue", "darkblue")
 
@@ -92,8 +93,96 @@ ggplot(music_data_frame_long, aes("", Percent, fill = factor(Music))) +
 # 
 
 
-  
-  
+
+## Convert columns to Rows
+
+Question = colnames(music_dataframe)
+
+
+music_data_frame_long
+music_data_frame_long$n
+
+
+df = data.frame(Question)
+df
+
+df = df %>%
+  add_column("Strongly_disagree" = NA,
+             "Disagree" = NA,
+             "Neutral" = NA,
+             "Agree" = NA,
+             "Strongly_agree" = NA)
+
+df
+
+music_vals = music_data_frame_long$n
+music_vals
+
+# Count occurrences of each value in each column
+occurrences <- lapply(music_dataframe, table)
+values <- lapply(occurrences, function(x) as.vector(unname(x)))
+occurrences
+values
+
+### INSERT VALUES FOR THE COLUMNS OF EACH QUESTION
+df[1, 2:(1 + length(music_vals))] <- c(music_vals, df[2, -(1:(1 + length(music_vals)))])
+df[2, 2:(1 + length(values$Slow.songs.or.fast.songs))] <- c(values$Slow.songs.or.fast.songs, df[2, -(1:(1 + length(values$Slow.songs.or.fast.songs)))])
+df[3, 2:(1 + length(values$Dance))] <- c(values$Dance, df[2, -(1:(1 + length(values$Dance)))])
+df[4, 2:(1 + length(values$Folk))] <- c(values$Folk, df[2, -(1:(1 + length(values$Folk)))])
+df[5, 2:(1 + length(values$Country))] <- c(values$Country, df[2, -(1:(1 + length(values$Country)))])
+df[6, 2:(1 + length(values$Classical.music))] <- c(values$Classical.music, df[2, -(1:(1 + length(values$Classical.music)))])
+df[7, 2:(1 + length(values$Musical))] <- c(values$Musical, df[2, -(1:(1 + length(values$Musical)))])
+df[8, 2:(1 + length(values$Pop))] <- c(values$Pop, df[2, -(1:(1 + length(values$Pop)))])
+df[9, 2:(1 + length(values$Rock))] <- c(values$Rock, df[2, -(1:(1 + length(values$Rock)))])
+df[10, 2:(1 + length(values$Metal.or.Hardrock))] <- c(values$Metal.or.Hardrock, df[2, -(1:(1 + length(values$Metal.or.Hardrock)))])
+df[11, 2:(1 + length(values$Punk))] <- c(values$Punk, df[2, -(1:(1 + length(values$Punk)))])
+df[12, 2:(1 + length(values$Hiphop..Rap))] <- c(values$Hiphop..Rap, df[2, -(1:(1 + length(values$Hiphop..Rap)))])
+df[13, 2:(1 + length(values$Reggae..Ska))] <- c(values$Reggae..Ska, df[2, -(1:(1 + length(values$Reggae..Ska)))])
+df[14, 2:(1 + length(values$Swing..Jazz))] <- c(values$Swing..Jazz, df[2, -(1:(1 + length(values$Swing..Jazz)))])
+df[15, 2:(1 + length(values$Rock.n.roll))] <- c(values$Rock.n.roll, df[2, -(1:(1 + length(values$Rock.n.roll)))])
+df[16, 2:(1 + length(values$Alternative))] <- c(values$Alternative, df[2, -(1:(1 + length(values$Alternative)))])
+df[17, 2:(1 + length(values$Latino))] <- c(values$Latino, df[2, -(1:(1 + length(values$Latino)))])
+df[18, 2:(1 + length(values$Techno..Trance))] <- c(values$Techno..Trance, df[2, -(1:(1 + length(values$Techno..Trance)))])
+df[19, 2:(1 + length(values$Opera))] <- c(values$Opera, df[2, -(1:(1 + length(values$Opera)))])
+
+df
+
+## Stacked percent bar chart
+
+df_long <- tidyr::gather(df, Answer, Occurrence, -Question)
+df_long
+
+# Calculate the percentages for each category
+df_long <- transform(df_long, Percentage = Occurrence / tapply(Occurrence, Question, sum)[Question] * 100)
+
+# Reorder the levels of the "Answer" variable in the dataframe
+df_long$Answer <- factor(df_long$Answer, levels = c("Strongly_agree", "Agree", "Neutral", "Disagree", "Strongly_disagree"))
+
+# Horizontal Stacked Bar Chart
+stacked_music_field <- ggplot(df_long, aes(x = Percentage, y = Question, fill = Answer, text = paste("Answer: ", Answer, "<br>Occurrences: ", Occurrence, "<br>Percentage: ", Percentage, "%"))) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = ifelse(Percentage < 3, "", paste0(round(Percentage, 1), "%"))),
+            position = position_stack(vjust = 0.5), color = "blue", size = 4) +
+  geom_text(aes(label = Occurrence), size = 0, alpha = 0) +  # Add hidden Occurrences
+  labs(x = "Percentage", y = "Category") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  ggtitle("How much people enjoy the following Categories?")+
+  scale_fill_manual(name = "Scale", values = c("green", "cyan", "grey", "chocolate1", "tomato2"), labels = c("Strongly disagree", "Disagree", "Neutral", "Agree", "Strongly agree"))
+
+# Convert ggplot to a plotly plot
+stacked_music_field <- ggplotly(stacked_music_field, tooltip = "text")
+
+# Modify the tooltip text
+stacked_music_field$x$data[[1]]$text <- df_long$Answer
+
+# Print the plot
+stacked_music_field
+
+
+library(plotly)
+
+
 library(shiny)
 runExample("01_hello")
 
