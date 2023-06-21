@@ -101,4 +101,12 @@ Now, we will take an overall look at each category
 - Create Pie charts for Genres of music/movie/etc
 
 
+```{r, echo = FALSE}
+library(shiny)
+shinyAppDir(
+  system.file("Young_People_Survey", package="shiny"),
+  options = list(width = "100%", height = 700)
+)
+```
+
 
