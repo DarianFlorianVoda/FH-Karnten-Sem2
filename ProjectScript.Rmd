@@ -14,6 +14,13 @@ output:
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
+```{r}
+library(ggplot2)
+library(dplyr)
+library(ggrepel)
+library(tidyverse)
+```
+
 ## R Data Visualization Project: Young People Survey
 
 ## Information about the main dataset (responses)
@@ -88,25 +95,40 @@ spendings_dataframe = data.frame(data[134:140])
 demographics_dataframe = data.frame(data[141:150])
 ```
 
-Now, we will take an overall look at each category
+Now, we will take a look how much people enjoy the **Music** in general
+
+Firstly create a dataframe of the frequencies for the specific question
+```{r}
+overall_music = music_dataframe %>% 
+  group_by(Music) %>%
+  summarise(counts = n())
+
+overall_music
+```
 
 ```{r}
+overall_music_plot = ggplot(overall_music, aes(x = Music, y = counts, fill=counts)) +
+  geom_bar(stat = "identity", fill="steelblue")+
+  geom_text(aes(label= counts), vjust = -0.3)+
+  theme(axis.title.x = element_blank(),
+        plot.title = element_text(hjust = 0.5))+
+  labs(y="Number of respondents")+
+  ggtitle("How much people enjoy Music?")+
+  geom_text(x=1, y=770, label="1 - not so much", color="red", hjust = 0, size = 5)+
+  geom_text(x=1, y=740, label="5 - very much", color = "blue", hjust = 0, size = 5)+
+  scale_y_continuous(breaks=round(seq(0, max(overall_music$counts), by=100), 1))
 
+overall_music_plot
 ```
+
+
+
+
 
 ## Idea:
 
 - Create an an interactive graph that is based on the specific things (Music, Movies, etc)
 - Then on the lower side of this mini-infograph you can expand the other things for the other categories
 - Create Pie charts for Genres of music/movie/etc
-
-
-```{r, echo = FALSE}
-library(shiny)
-shinyAppDir(
-  system.file("Young_People_Survey", package="shiny"),
-  options = list(width = "100%", height = 700)
-)
-```
 
 
