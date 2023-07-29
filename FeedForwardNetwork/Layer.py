@@ -1,35 +1,49 @@
-# The layer class
-import numpy as np
-
-from FeedForwardNetwork.utils import tanh, d_tanh, sigmoid, d_sigmoid
+from FeedForwardNetwork.Neuron import Neuron
 
 
-class Layer:
+class Layer():
+    '''
+        Layer is modelizing a layer in the fully-connected-feedforward neural network architecture.
+        It will play the role of connecting everything together inside and will be doing the backpropagation 
+        update.
+    '''
 
-    activationFunctions = {
-        'tanh': (tanh, d_tanh),
-        'sigmoid': (sigmoid, d_sigmoid)
-    }
-    learning_rate = 0.1
+    def __init__(self, num_neuron, is_output_layer=False):
 
-    def __init__(self, inputs, neurons, activation):
-        self.W = np.random.randn(neurons, inputs)
-        self.b = np.zeros((neurons, 1))
-        self.act, self.d_act = self.activationFunctions.get(activation)
+        # Will create that much neurons in this layer
+        self.is_output_layer = is_output_layer
+        self.neurons = []
+        for i in range(num_neuron):
+            # Create neuron
+            neuron = Neuron(i, is_output_neuron=is_output_layer)
+            self.neurons.append(neuron)
 
-    def feedforward(self, A_prev):
-        self.A_prev = A_prev
-        self.Z = np.dot(self.W, self.A_prev) + self.b
-        self.A = self.act(self.Z)
-        return self.A
+    def attach(self, layer):
+        '''
+            This function attach the neurons from this layer to another one
+            This is needed for the backpropagation algorithm
+        '''
+        # Iterate over the neurons in the current layer and attach 
+        # them to the next layer
+        for in_neuron in self.neurons:
+            in_neuron.attach_to_output(layer.neurons)
 
-    def backprop(self, dA):
-        dZ = np.multiply(self.d_act(self.Z), dA)
-        dW = 1/dZ.shape[1] * np.dot(dZ, self.A_prev.T)
-        db = 1/dZ.shape[1] * np.sum(dZ, axis=1, keepdims=True)
-        dA_prev = np.dot(self.W.T, dZ)
+    def init_layer(self, num_input):
+        '''
+            This will initialize the weights of each neuron in the layer.
+            By giving the right num_input it will spawn the right number of weights
+        '''
 
-        self.W = self.W - self.learning_rate * dW
-        self.b = self.b - self.learning_rate * db
+        # Iterate over each of the neuron and initialize
+        # the weights that connect with the previous layer
+        for neuron in self.neurons:
+            neuron.init_weights(num_input)
 
-        return dA_prev
+    def predict(self, row):
+        '''
+            This will calcualte the activations for the full layer given the row of data 
+            streaming in.
+        '''
+        row.append(1)  # need to add the bias
+        activations = [neuron.predict(row) for neuron in self.neurons]
+        return activations

@@ -1,40 +1,45 @@
 import numpy as np
 
-from FeedForwardNetwork.Layer import Layer
-from FeedForwardNetwork.utils import logloss, d_logloss
-import matplotlib.pyplot as plt
-
-x_train = np.array([[0, 0, 1, 1], [0, 1, 0, 1]]) # dim x m
-y_train = np.array([[0, 1, 1, 0]]) # 1 x m
-
-m = 4
-epochs = 1500
-
-layers = [Layer(2, 3, 'tanh'), Layer(3, 1, 'sigmoid')]
-costs = [] # to plot graph
-
-for epoch in range(epochs):
-    # Feedforward
-    A = x_train
-    for layer in layers:
-        A = layer.feedforward(A)
-
-    # Calulate cost to plot graph
-    cost = 1/m * np.sum(logloss(y_train, A))
-    costs.append(cost)
-
-    # Backpropagation
-    dA = d_logloss(y_train, A)
-    for layer in reversed(layers):
-        dA = layer.backprop(dA)
+from FeedForwardNetwork.MLP import MultiLayerPerceptron
+from FeedForwardNetwork.half_moon import create_half_moon, label_half_moon
 
 
-# Making predictions
-A = x_train
-for layer in layers:
-    A = layer.feedforward(A)
-print(A)
+def XOR_example():
+    X = [[0, 0], [0, 1], [1, 0], [1, 1]]
+    y = [0, 1, 1, 0]
+
+    # Init the parameters for the network
+    clf = MultiLayerPerceptron(learning_rate=0.1, num_iteration=100000)
+
+    # Create the architecture backward
+    clf.add_output_layer(num_neuron=1)
+    clf.add_hidden_layer(num_neuron=3)
+    clf.add_hidden_layer(num_neuron=2)
+
+    # Train the network
+    print(clf.fit(X, y))
 
 
-plt.plot(range(epochs), costs)
-plt.show()
+def halfmoon_linear_example():
+    X, y = label_half_moon(n=2000, w=0.2, r=0.6, d=-0.1)
+
+    # Init the parameters for the network
+    clf = MultiLayerPerceptron(learning_rate=0.1, num_iteration=100000)
+
+    # Create the architecture backward
+    clf.add_output_layer(num_neuron=1)
+    clf.add_hidden_layer(num_neuron=3)
+    clf.add_hidden_layer(num_neuron=2)
+
+    # Train the network
+    print(clf.fit(X, y))
+
+
+# x1, y1, x2, y2 = create_half_moon(2000, 0.2, 0.6, 0.1)
+
+# X, y = label_half_moon()
+
+# print(X)
+# print(y)
+
+halfmoon_linear_example()

@@ -23,5 +23,10 @@ def logloss(y, a):
     return -(y * np.log(a) + (1 - y) * np.log(1 - a))
 
 
+def softmax(self, x):
+    exp_x = np.exp(x - np.max(x, axis=1, keepdims=True))
+    return exp_x / np.sum(exp_x, axis=1, keepdims=True)
+
+
 def d_logloss(y, a):
     return (a - y) / (a * (1 - a))
