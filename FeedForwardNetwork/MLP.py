@@ -9,7 +9,7 @@ class MultiLayerPerceptron():
         an input layer, a perceptrons layer and a one neuron output layer which does binary classification
     '''
 
-    def __init__(self, learning_rate=0.01, num_iteration=100, weight_decay=0.01):
+    def __init__(self, learning_rate=0.01, num_iteration=100, weight_decay=0.0):
 
         # Layers
         self.layers = []

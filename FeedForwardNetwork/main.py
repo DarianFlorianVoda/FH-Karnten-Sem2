@@ -29,7 +29,6 @@ def halfmoon_linear_example():
     # Create the architecture backward
     clf.add_output_layer(num_neuron=1)
     clf.add_hidden_layer(num_neuron=3)
-    clf.add_hidden_layer(num_neuron=2)
 
     # Train the network
     print(clf.fit(X, y))
@@ -55,5 +54,6 @@ def halfmoon_nonlinear_example():
 
 # print(X)
 # print(y)
+halfmoon_linear_example()
 
-halfmoon_nonlinear_example()
+# halfmoon_nonlinear_example()
