@@ -1,6 +1,5 @@
-import random
 import math
-
+import random
 
 class Neuron():
     '''
@@ -75,7 +74,7 @@ class Neuron():
         for new_weight in self.updated_weights:
             self.weights.append(new_weight)
 
-    def calculate_update(self, learning_rate, target):
+    def calculate_update(self, learning_rate, target, weight_decay):
         '''
             This function will calculate the updated weights for this neuron. It will first calculate
             the right delta (depending if this neuron is a ouput or a hidden neuron), then it will
@@ -100,8 +99,9 @@ class Neuron():
         # Reset the update weights
         self.updated_weights = []
 
-        # Iterate over each weight and update them
+        # Iterate over each weight and update them with weight decay
         for cur_weight, cur_input in zip(self.weights, self.inputs):
             gradient = self.delta * cur_input
-            new_weight = cur_weight - learning_rate * gradient
+            weight_decay_term = weight_decay * cur_weight
+            new_weight = cur_weight - learning_rate * (gradient + weight_decay_term)
             self.updated_weights.append(new_weight)

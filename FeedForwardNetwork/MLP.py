@@ -9,7 +9,7 @@ class MultiLayerPerceptron():
         an input layer, a perceptrons layer and a one neuron output layer which does binary classification
     '''
 
-    def __init__(self, learning_rate=0.01, num_iteration=100):
+    def __init__(self, learning_rate=0.01, num_iteration=100, weight_decay=0.01):
 
         # Layers
         self.layers = []
@@ -17,6 +17,7 @@ class MultiLayerPerceptron():
         # Training parameters
         self.learning_rate = learning_rate
         self.num_iteration = num_iteration
+        self.weight_decay = weight_decay
 
     def add_output_layer(self, num_neuron):
         '''
@@ -44,12 +45,11 @@ class MultiLayerPerceptron():
         # Iterate over each of the layer in reverse order
         # to calculate the updated weights
         for layer in reversed(self.layers):
-
             # Calculate update the hidden layer
             for neuron in layer.neurons:
-                neuron.calculate_update(self.learning_rate, target)
+                neuron.calculate_update(self.learning_rate, target, self.weight_decay)
 
-                # Iterate over each of the layer in normal order
+        # Iterate over each of the layer in normal order
         # to update the weights
         for layer in self.layers:
             for neuron in layer.neurons:
