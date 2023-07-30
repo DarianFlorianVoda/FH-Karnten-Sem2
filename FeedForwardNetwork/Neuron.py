@@ -1,6 +1,7 @@
 import math
 import random
 
+
 class Neuron():
     '''
         A conceptual Neuron hat can be trained using a

@@ -1,3 +1,5 @@
+import numpy as np
+
 from FeedForwardNetwork.Neuron import Neuron
 
 
@@ -47,6 +49,8 @@ class Layer():
             This will calculate the activations for the full layer given the row of data
             streaming in.
         '''
-        row.append(1)  # need to add the bias
-        activations = [neuron.predict(row) for neuron in self.neurons]
+        bias = np.array([1])  # Create a bias term with value 1
+        row_with_bias = np.concatenate([row, bias])  # Add the bias term to the input row
+
+        activations = [neuron.predict(row_with_bias) for neuron in self.neurons]
         return activations
