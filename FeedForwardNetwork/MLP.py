@@ -1,5 +1,7 @@
 import random
 
+import numpy as np
+
 from FeedForwardNetwork.Layer import Layer
 
 
@@ -103,18 +105,12 @@ class MultiLayerPerceptron():
         '''
 
         # Gather all the activation in the hidden layer
-
         activations = self.layers[0].predict(row)
         for i in range(1, len(self.layers)):
             activations = self.layers[i].predict(activations)
 
-        outputs = []
-        for activation in activations:
-            # Decide if we output a 1 or 0
-            if activation >= 0.5:
-                outputs.append(1.0)
-            else:
-                outputs.append(0.0)
+        # Use the softmax function to convert activations to probabilities
+        exp_activations = np.exp(activations - np.max(activations))  # To prevent numerical instability
+        probabilities = exp_activations / np.sum(exp_activations)
 
-        # We currently have only One output allowed
-        return outputs[0]
+        return probabilities

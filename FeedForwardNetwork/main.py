@@ -84,7 +84,7 @@ def train_from_files(file_paths):
 # print(y)
 # halfmoon_linear_example()
 
-# halfmoon_nonlinear_example()
+halfmoon_nonlinear_example()
 
 
 # Provide the paths to the four ASCII files
@@ -93,4 +93,4 @@ file_paths = ['C:\\Users\\daria\\PycharmProjects\\FH-Karnten-Sem2\\FeedForwardNe
               'C:\\Users\\daria\\PycharmProjects\\FH-Karnten-Sem2\\FeedForwardNetwork\\NoisySymbols\\10Times10NoisyPlus.txt',
               'C:\\Users\\daria\\PycharmProjects\\FH-Karnten-Sem2\\FeedForwardNetwork\\NoisySymbols\\10Times10NoisyX.txt']
 
-train_from_files(file_paths)
+# train_from_files(file_paths)
