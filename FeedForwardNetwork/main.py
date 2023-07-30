@@ -69,8 +69,8 @@ def halfmoon_linear_example():
     clf = MultiLayerPerceptron(learning_rate=0.01, num_iteration=10000, weight_decay=0.01)
 
     # Create the architecture backward
-    clf.add_output_layer(num_neurons=1)  # Use linear activation for the output layer
-    clf.add_hidden_layer(num_neuron=10, activation='tanh')  # Use linear activation for the hidden layer
+    clf.add_output_layer(num_neurons=1)  # Use sigmoid activation for the output layer
+    clf.add_hidden_layer(num_neuron=10, activation='tanh')  # Use tanh activation for the hidden layer
 
     # Train the network
     clf.fit(X_train, y_train)
@@ -203,6 +203,14 @@ def train_from_files(file_paths):
     print("Prediction error rate from a test set:")
     print(clf.predict(X_test[0]))
 
+# Provide the paths to the four ASCII files
+file_paths = [
+    'C:\\Users\\daria\\PycharmProjects\\FH-Karnten-Sem2\\FeedForwardNetwork\\NoisySymbols\\10Times10NoisyCycle.txt',
+    'C:\\Users\\daria\\PycharmProjects\\FH-Karnten-Sem2\\FeedForwardNetwork\\NoisySymbols\\10Times10NoisyMinus.txt',
+    'C:\\Users\\daria\\PycharmProjects\\FH-Karnten-Sem2\\FeedForwardNetwork\\NoisySymbols\\10Times10NoisyPlus.txt',
+    'C:\\Users\\daria\\PycharmProjects\\FH-Karnten-Sem2\\FeedForwardNetwork\\NoisySymbols\\10Times10NoisyX.txt']
+
+######## EXAMPLES
 
 # x1, y1, x2, y2 = create_half_moon(2000, 0.2, 0.6, 0.1)
 
@@ -213,16 +221,8 @@ def train_from_files(file_paths):
 
 # XOR_example()
 
-# halfmoon_linear_example()
+halfmoon_linear_example()
 
 # halfmoon_nonlinear_example()
 
-
-# Provide the paths to the four ASCII files
-file_paths = [
-    'C:\\Users\\daria\\PycharmProjects\\FH-Karnten-Sem2\\FeedForwardNetwork\\NoisySymbols\\10Times10NoisyCycle.txt',
-    'C:\\Users\\daria\\PycharmProjects\\FH-Karnten-Sem2\\FeedForwardNetwork\\NoisySymbols\\10Times10NoisyMinus.txt',
-    'C:\\Users\\daria\\PycharmProjects\\FH-Karnten-Sem2\\FeedForwardNetwork\\NoisySymbols\\10Times10NoisyPlus.txt',
-    'C:\\Users\\daria\\PycharmProjects\\FH-Karnten-Sem2\\FeedForwardNetwork\\NoisySymbols\\10Times10NoisyX.txt']
-
-train_from_files(file_paths)
+# train_from_files(file_paths)

@@ -68,7 +68,6 @@ class MultiLayerPerceptron():
         hidden_layer = Layer(num_neuron, activation=activation, position_in_layer=len(self.layers))
         # Attach the last added layer to this new layer
         hidden_layer.attach(self.layers[0])
-        # Add this layer to the architecture
         self.activation = activation
         self.layers.insert(0, hidden_layer)
 
@@ -102,7 +101,7 @@ class MultiLayerPerceptron():
                    y (numpy.ndarray): The target labels for the training data.
         """
         num_row = len(X)
-        num_feature = len(X[0])  # Here we assume that we have a rectangular matrix
+        num_feature = len(X[0])  # assume that we have a rectangular matrix
 
         # Init the weights throughout each of the layer
         self.layers[0].init_layer(num_feature)
