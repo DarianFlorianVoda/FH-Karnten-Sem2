@@ -3,6 +3,21 @@ from matplotlib import pyplot as plt
 
 
 def create_half_moon(n=2000, w=0.2, r=0.6, d=0.1):
+    """
+        Creates synthetic data for two half-moon shapes.
+
+        Parameters:
+            n (int): The number of data points to generate for each half-moon shape. Default is 2000.
+            w (float): Width of the strip between the two half-moons. Default is 0.2.
+            r (float): Radius of each half-moon. Default is 0.6.
+            d (float): Distance between the centers of the two half-moons. Default is 0.1.
+
+        Returns:
+            x1 (numpy.ndarray): Array containing the x-coordinates of points in the first half-moon.
+            y1 (numpy.ndarray): Array containing the y-coordinates of points in the first half-moon.
+            x2 (numpy.ndarray): Array containing the x-coordinates of points in the second half-moon.
+            y2 (numpy.ndarray): Array containing the y-coordinates of points in the second half-moon.
+    """
     c1 = np.array([(r + w) / 2, d / 2])
     c2 = np.array([-(r + w) / 2, -d / 2])
 
@@ -29,6 +44,19 @@ def create_half_moon(n=2000, w=0.2, r=0.6, d=0.1):
 
 
 def label_half_moon(n=2000, w=0.2, r=0.6, d=0.1):
+    """
+    Creates labeled data for two half-moon shapes.
+
+    Parameters:
+        n (int): The number of data points to generate for each half-moon shape. Default is 2000.
+        w (float): Width of the strip between the two half-moons. Default is 0.2.
+        r (float): Radius of each half-moon. Default is 0.6.
+        d (float): Distance between the centers of the two half-moons. Default is 0.1.
+
+    Returns:
+        X (list): List of data points, where each point is represented as a list [x, y].
+        y (list): List of corresponding labels for the data points (0 for first half-moon, 1 for second half-moon).
+    '''"""
     x1, y1, x2, y2 = create_half_moon(n=n, w=w, r=r, d=d)
     X = list()
     y = list()

@@ -1,14 +1,39 @@
 import math
 import random
 
+from FeedForwardNetwork.utils import sigmoid, relu, tanh, softmax
+
 
 class Neuron():
-    '''
-        A conceptual Neuron hat can be trained using a
-        fit and predict methodology, without any library
-    '''
+    """
+        A Neuron class that represents a conceptual neuron, which can be trained and used for prediction
+        using a fit and predict methodology without any library.
 
+        Attributes:
+            position_in_layer (int): The position index of the neuron in its layer.
+            is_output_neuron (bool): Indicates if the neuron is an output neuron. Default is False.
+
+        Methods:
+            attach_to_output(neurons): Helper function to store the reference of the other neurons
+                                       to this particular neuron (used for backpropagation).
+            init_weights(num_input): Initialize the weights of the neuron given the number of inputs.
+            predict(row, activation_fun='sigmoid'): Given a row of data, predict the output of the neuron.
+            update_neuron(): Update the neuron's weights with the weights calculated during backpropagation.
+            calculate_update(learning_rate, target, weight_decay): Calculate the updated weights for the neuron
+                                                                  using the backpropagation algorithm.
+
+        Note:
+            The activation function for the neuron can be specified when calling the predict() method.
+            The options for activation_fun are: 'sigmoid', 'relu', 'tanh', or 'softmax'.
+        """
     def __init__(self, position_in_layer, is_output_neuron=False):
+        """
+                Constructor for Neuron class.
+
+                Parameters:
+                    position_in_layer (int): The position index of the neuron in its layer.
+                    is_output_neuron (bool, optional): Indicates if the neuron is an output neuron. Default is False.
+        """
         self.weights = []
         self.inputs = []
         self.output = None
@@ -23,35 +48,38 @@ class Neuron():
         self.position_in_layer = position_in_layer
 
     def attach_to_output(self, neurons):
-        '''
-            Helper function to store the reference of the other neurons
-            To this particular neuron (used for backpropagation)
-        '''
+        """
+                Helper function to store the reference of the other neurons to this particular neuron.
+                This is used for backpropagation.
 
+                Parameters:
+                    neurons (list): The list of neurons to which this neuron will be attached.
+        """
         self.output_neurons = neurons
 
-    def sigmoid(self, x):
-        '''
-            simple sigmoid function (logistic) used for the activation
-        '''
-        return 1 / (1 + math.exp(-x))
-
     def init_weights(self, num_input):
-        '''
-            This is used to setup the weights when we know how many inputs there is for
-            a given neuron
-        '''
+        """
+                Initialize the weights of the neuron given the number of inputs.
 
+                Parameters:
+                    num_input (int): The number of input features for the neuron.
+        """
         # Randomly initalize the weights
         for i in range(num_input + 1):
             self.weights.append(random.uniform(0, 1))
 
-    def predict(self, row):
-        '''
-            Given a row of data it will predict what the output should be for
-            this given neuron. We can have many input, but only one output for a neuron
-        '''
+    def predict(self, row, activation_fun='sigmoid'):
+        """
+                Given a row of data, predict the output of the neuron.
 
+                Parameters:
+                    row (numpy.ndarray): A row of data as input to the neuron.
+                    activation_fun (str, optional): The activation function to use for the neuron's output.
+                                                   Default is 'sigmoid'.
+
+                Returns:
+                    float: The output of the neuron after applying the specified activation function.
+        """
         # Reset the inputs
         self.inputs = []
 
@@ -61,28 +89,39 @@ class Neuron():
             self.inputs.append(feature)
             activation = activation + weight * feature
 
-        self.output = self.sigmoid(activation)
+        if activation_fun == 'sigmoid':
+            self.output = sigmoid(activation)
+        elif activation_fun == 'relu':
+            self.output = relu(activation)
+        elif activation_fun == 'tanh':
+            self.output = tanh(activation)
+        elif activation_fun == 'softmax':
+            self.output = softmax(activation)
+
         return self.output
 
     def update_neuron(self):
-        '''
-            Will update a given neuron weights by replacing the current weights
-            with those used during the backpropagation. This need to be done at the end of the
-            backpropagation
-        '''
-
+        """
+                Update the neuron's weights with the weights calculated during backpropagation.
+                This function is called at the end of the backpropagation process to apply the updates.
+        """
         self.weights = []
         for new_weight in self.updated_weights:
             self.weights.append(new_weight)
 
     def calculate_update(self, learning_rate, target, weight_decay):
-        '''
-            This function will calculate the updated weights for this neuron. It will first calculate
-            the right delta (depending if this neuron is a ouput or a hidden neuron), then it will
-            calculate the right updated_weights. It will not overwrite the weights yet as they are needed
-            for other update in the backpropagation algorithm.
-        '''
+        """
+                Calculate the updated weights for the neuron using the backpropagation algorithm.
 
+                Parameters:
+                    learning_rate (float): The learning rate used for weight updates during backpropagation.
+                    target (float): The target output value for the neuron.
+                    weight_decay (float): The weight decay parameter applied to the neuron's weights.
+
+                Note:
+                    This function should be called after the predict() method to calculate the neuron's output.
+
+        """
         if self.is_output_neuron:
             # Calculate the delta for the output
             self.delta = (self.output - target) * self.output * (1 - self.output)

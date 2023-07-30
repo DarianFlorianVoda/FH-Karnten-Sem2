@@ -6,13 +6,36 @@ from FeedForwardNetwork.Layer import Layer
 
 
 class MultiLayerPerceptron():
-    '''
-        We will be creating the multi-layer perceptron with only two layer:
-        an input layer, a perceptrons layer and a one neuron output layer which does binary classification
-    '''
+    """
+        A Multi-Layer Perceptron (MLP) class for implementing a neural network with one hidden layer
+        and an output layer that supports both binary and multiclass classification.
 
+        Attributes:
+            learning_rate (float): The learning rate for the training process. Default is 0.01.
+            num_iteration (int): The number of training iterations. Default is 100.
+            weight_decay (float): The weight decay coefficient for regularization. Default is 0.0.
+            layers (list): A list to store the layers of the neural network.
+
+        Methods:
+            add_output_layer(num_neurons, activation='sigmoid'): Add the output layer to the architecture.
+            add_hidden_layer(num_neuron, activation='sigmoid'): Add a hidden layer to the architecture.
+            update_layers(target): Update all the layers by calculating the updated weights and then
+                                   updating the weights all at once when the new weights are found.
+            fit(X, y): Main training function of the neural network algorithm using stochastic gradient descent.
+            predict(row): Prediction function that will take a row of input and give back the output of
+                          the whole neural network. Supports both binary and multiclass classification.
+            accuracy_multiclass(X_test, y_test): Calculate the accuracy of the trained neural network on
+                                                multiclass classification tasks using test data.
+        """
     def __init__(self, learning_rate=0.01, num_iteration=100, weight_decay=0.0):
+        """
+                Constructor for MultiLayerPerceptron class.
 
+                Parameters:
+                    learning_rate (float, optional): The learning rate for the training process. Default is 0.01.
+                    num_iteration (int, optional): The number of training iterations. Default is 100.
+                    weight_decay (float, optional): The weight decay coefficient for regularization. Default is 0.0.
+        """
         # Layers
         self.layers = []
 
@@ -21,29 +44,42 @@ class MultiLayerPerceptron():
         self.num_iteration = num_iteration
         self.weight_decay = weight_decay
 
-    def add_output_layer(self, num_neuron):
-        '''
-            This helper function will create a new output layer and add it to the architecture
-        '''
-        self.layers.insert(0, Layer(num_neuron, is_output_layer=True))
+    def add_output_layer(self, num_neurons, activation='sigmoid'):
+        """
+                Add the output layer to the architecture.
 
-    def add_hidden_layer(self, num_neuron):
-        '''
-            This helper function will create a new hidden layer, add it to the architecture
-            and finally attach it to the front of the architecture
-        '''
-        # Create an hidden layer
-        hidden_layer = Layer(num_neuron)
+                Parameters:
+                    num_neurons (int): The number of neurons in the output layer.
+                    activation (str, optional): The activation function to use for the output layer.
+                                               Default is 'sigmoid'.
+        """
+        self.layers.insert(0, Layer(num_neuron=num_neurons, activation=activation, is_output_layer=True))
+
+    def add_hidden_layer(self, num_neuron, activation='sigmoid'):
+        """
+                Add a hidden layer to the architecture.
+
+                Parameters:
+                    num_neuron (int): The number of neurons in the hidden layer.
+                    activation (str, optional): The activation function to use for the hidden layer.
+                                               Default is 'sigmoid'.
+        """
+        # Create a hidden layer
+        hidden_layer = Layer(num_neuron, activation=activation, position_in_layer=len(self.layers))
         # Attach the last added layer to this new layer
         hidden_layer.attach(self.layers[0])
-        # Add this layers to the architecture
+        # Add this layer to the architecture
+        self.activation = activation
         self.layers.insert(0, hidden_layer)
 
     def update_layers(self, target):
-        '''
-            Will update all the layers by calculating the updated weights and then updating
-            the weights all at once when the new weights are found.
-        '''
+        """
+                Update all the layers by calculating the updated weights and then updating the weights
+                all at once when the new weights are found.
+
+                Parameters:
+                    target (float): The target output value for the neural network during training.
+        """
         # Iterate over each of the layer in reverse order
         # to calculate the updated weights
         for layer in reversed(self.layers):
@@ -58,12 +94,13 @@ class MultiLayerPerceptron():
                 neuron.update_neuron()
 
     def fit(self, X, y):
-        '''
-            Main training function of the neural network algorithm. This will make use of backpropagation.
-            It will use stochastic gradient descent by selecting one row at random from the dataset and
-            use predict to calculate the error. The error will then be backpropagated and new weights calculated.
-            Once all the new weights are calculated, the whole network weights will be updated
-        '''
+        """
+               Main training function of the neural network algorithm using stochastic gradient descent.
+
+               Parameters:
+                   X (numpy.ndarray): The input training data.
+                   y (numpy.ndarray): The target labels for the training data.
+        """
         num_row = len(X)
         num_feature = len(X[0])  # Here we assume that we have a rectangular matrix
 
@@ -99,18 +136,52 @@ class MultiLayerPerceptron():
                 print(f"Iteration {i} with error = {mean_error}")
 
     def predict(self, row):
-        '''
-            Prediction function that will take a row of input and give back the output
-            of the whole neural network.
-        '''
+        """
+                Prediction function that will take a row of input and give back the output of the whole neural network.
 
+                Parameters:
+                    row (numpy.ndarray): A row of input data for prediction.
+
+                Returns:
+                    float or numpy.ndarray: The output of the neural network after applying the activation function.
+                                            For binary classification, the output is a float (0 or 1).
+                                            For multiclass classification, the output is a numpy array representing
+                                            the probabilities for each class label.
+        """
         # Gather all the activation in the hidden layer
         activations = self.layers[0].predict(row)
         for i in range(1, len(self.layers)):
             activations = self.layers[i].predict(activations)
 
-        # Use the softmax function to convert activations to probabilities
-        exp_activations = np.exp(activations - np.max(activations))  # To prevent numerical instability
-        probabilities = exp_activations / np.sum(exp_activations)
+        # Output layer's activation function
+        if len(self.layers[0].neurons) == 1:
+            # For binary classification, use sigmoid activation for the output layer
+            exp_activations = np.exp(activations)
+            probabilities = exp_activations / (1 + exp_activations)
+            return probabilities[0]
+        else:
+            # For multiclass classification, use softmax activation for the output layer
+            exp_activations = np.exp(activations - np.max(activations))  # To prevent numerical instability
+            probabilities = exp_activations / np.sum(exp_activations)
+            return probabilities
 
-        return probabilities
+    def accuracy_multiclass(self, X_test, y_test):
+        """
+                Calculate the accuracy of the trained neural network on multiclass classification tasks using test data.
+
+                Parameters:
+                    X_test (numpy.ndarray): The input test data.
+                    y_test (numpy.ndarray): The true target labels for the test data.
+
+                Returns:
+                    float: The accuracy of the neural network on the multiclass classification task.
+        """
+        correct = 0
+        total = len(y_test)
+
+        for i, row in enumerate(X_test):
+            y_pred = np.argmax(self.predict(row))
+            if y_pred == y_test[i]:
+                correct += 1
+
+        return correct / total
